@@ -1,7 +1,7 @@
 version: 2.1
 
 executors:
-  node:
+  node: 
     docker:
       - image: circleci/node:13.8.0
   python:
@@ -103,8 +103,9 @@ jobs:
           working_directory: ./frontend
           command: npm run build
       - save_cache:
-          paths: [frontend/node_modules]
-          key: frontend-build
+          paths: 
+            - frontend/node_modules
+          key: frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
 
   build-backend:
     executor: node
@@ -120,7 +121,7 @@ jobs:
           command: npm run build
       - save_cache:
           paths: [backend/node_modules]
-          key: backend-build
+          key: backend-build-${CIRCLE_WORKFLOW_ID:0:7}
 
   
   ###### TESTING #######
@@ -130,8 +131,9 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build]
-      - run-nodejs-tests
+          keys: 
+            - frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
+      - run-nodejs-tests:
           workingdir: "./frontend"
 
   test-backend:
@@ -139,7 +141,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build]
+          keys: 
+            - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run-nodejs-tests:
           workingdir: "./backend"
             
@@ -148,7 +151,8 @@ jobs:
     steps:      
       - checkout
       - restore_cache:
-          keys: [frontend-build]
+          keys:
+            - frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run-nodejs-scan:
           workingdir: "./frontend"
 
@@ -158,7 +162,8 @@ jobs:
     steps:      
       - checkout
       - restore_cache:
-          keys: [backend-build]
+          keys:
+            - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run-nodejs-scan:
           workingdir: "./backend"
 
@@ -168,35 +173,36 @@ jobs:
   #######################
 
   deploy-infrastructure:
-    docker:
-      # Docker image here that supports AWS CLI
+    executor: aws
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=udapeople \
-              --stack-name "your back-end stack name with workflow id" \
-              --parameter-overrides ID="your workflow id"  
+              --stack-name "udapeoplebackend${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7} 
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeople \
-              --stack-name "your front-end stack name with workflow id" \
-              --parameter-overrides ID="your workflow id"  
+              --stack-name "udapeoplefrontend${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            # Your code here
-            exit 1
-      - persist_to_workspace:
-          root: ~/
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text
+      - save_cache:
+          key: ansible-inventory-${CIRCLE_WORKFLOW_ID}
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - ./.circleci/ansible/inventory
       # Here's where you will add some code to rollback on failure      
 
   configure-infrastructure:
