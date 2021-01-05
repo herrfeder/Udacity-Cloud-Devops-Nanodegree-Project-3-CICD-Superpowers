@@ -202,7 +202,7 @@ jobs:
               --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --output text >> .circleci/ansible/backend_ip
       - run:
-           name: Add back-end IP to inventory
+          name: Add back-end IP to inventory
           command: |
             cat .circleci/ansible/backend_ip >> .circleci/ansible/inventory
       - save_cache:
