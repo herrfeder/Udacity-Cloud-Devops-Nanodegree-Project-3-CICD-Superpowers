@@ -244,6 +244,7 @@ jobs:
 
   run-migrations:
     executor: node
+    steps:
       - checkout
       - attach_workspace:
           at: .
