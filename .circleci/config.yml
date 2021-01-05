@@ -213,7 +213,7 @@ jobs:
             - .circleci/ansible/inventory
             - .circleci/ansible/backend_ip
           when: on_success
-      - destroy_environment:
+      - destroy-environment:
           when: on_fail 
 
 
@@ -238,7 +238,7 @@ jobs:
           working_directory: .circleci
           command: |
             ansible-playbook -i ansible/inventory files/configure-server.yaml
-      - destroy_environment:
+      - destroy-environment:
           when: on_fail
 
 
@@ -273,7 +273,7 @@ jobs:
           working_directory: ./backend
           command: |
             curl -H "Content-Type: text/plain" -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request PUT --data "$(migration_result)" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7}
-      - destroy_environment:
+      - destroy-environment:
           when: on_fail
 
 
@@ -312,7 +312,7 @@ jobs:
           working_directory: ./frontend
           command: |
             aws s3 cp ./dist "s3://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
-      - destroy_environment:
+      - destroy-environment:
           when: on_fail
 
                     
@@ -334,7 +334,7 @@ jobs:
           working_directory: .circleci/ansible/
           command: |
             ansible-playbook -i inventory deploy-backend.yml 
-      - destroy_environment:
+      - destroy-environment:
           when: on_fail
 
 
