@@ -169,6 +169,7 @@ jobs:
   deploy-infrastructure:
     executor: aws
     steps:
+      - checkout
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -206,7 +207,7 @@ jobs:
             - .circleci/ansible/inventory
             - .circleci/ansible/backend_ip
           when: on_success
-       - destroy-environment
+      - destroy-environment
 
 
 
