@@ -166,14 +166,9 @@ jobs:
           workingdir: "./backend"
 
 
-  #######################
-  ##### C DELIVERY ######
-  #######################
-
   deploy-infrastructure:
     executor: aws
     steps:
-      #- checkout
       - run:
           name: Ensure back-end infrastructure exists
           command: |
