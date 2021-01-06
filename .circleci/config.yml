@@ -236,8 +236,8 @@ jobs:
           working_directory: .circleci
           command: |
             ansible-playbook -i ansible/inventory files/configure-server.yaml
-      - destroy-environment:
-          when: on_fail
+       #- destroy-environment:
+       #when: on_fail
 
 
   run-migrations:
