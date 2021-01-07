@@ -105,7 +105,7 @@ jobs:
       - save_cache:
           paths: 
             - frontend/node_modules
-          key: frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          key: frontend-build-${CIRCLE_WORKFLOW_ID:0:6}
 
   build-backend:
     executor: node
@@ -134,7 +134,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            - frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
+            - frontend-build-${CIRCLE_WORKFLOW_ID:0:6}
       - run-nodejs-tests:
           workingdir: "./frontend"
 
@@ -154,7 +154,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
+            - frontend-build-${CIRCLE_WORKFLOW_ID:0:6}
       - run-nodejs-scan:
           workingdir: "./frontend"
 
