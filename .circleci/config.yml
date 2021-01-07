@@ -37,10 +37,6 @@ commands:
         default: "."
         type: string
     steps:
-            #- run:
-            #name: Linting the source defined in working_directory
-            #working_directory: "<< parameters.workingdir >>"
-            #command: npm run lint
       - run:
           name: Generic testing of the javascript source with jest defined in working_directory
           working_directory: "<< parameters.workingdir >>"
