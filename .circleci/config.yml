@@ -21,6 +21,10 @@ commands:
         type: string
     steps:
       - run:
+          name: Update npm 
+          working_directory: "<< parameters.workingdir >>"
+          command: npm update
+      - run:
           name: Scanning the source defined in workingdir against npm audit
           working_directory: "<< parameters.workingdir >>"
           command: npm audit --audit-level=critical
@@ -33,10 +37,10 @@ commands:
         default: "."
         type: string
     steps:
-      - run:
-          name: Linting the source defined in working_directory
-          working_directory: "<< parameters.workingdir >>"
-          command: npm run lint
+            #- run:
+            #name: Linting the source defined in working_directory
+            #working_directory: "<< parameters.workingdir >>"
+            #command: npm run lint
       - run:
           name: Generic testing of the javascript source with jest defined in working_directory
           working_directory: "<< parameters.workingdir >>"
