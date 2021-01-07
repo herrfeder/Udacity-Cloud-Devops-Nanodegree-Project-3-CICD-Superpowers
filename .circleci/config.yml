@@ -28,6 +28,10 @@ commands:
           name: Scanning the source defined in workingdir against npm audit
           working_directory: "<< parameters.workingdir >>"
           command: npm audit --audit-level=critical
+      - run:
+          name: Fix security issues
+          command: npm audit fix
+          when: on_fail
 
 
   run-nodejs-tests:
@@ -164,6 +168,13 @@ jobs:
             - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run-nodejs-scan:
           workingdir: "./backend"
+      - save_cache:
+          paths:
+            - backend/node_modules
+            - backend/dist
+          key: backend-build-${CIRCLE_WORKFLOW_ID:0:7}
+
+
 
 
   deploy-infrastructure:
