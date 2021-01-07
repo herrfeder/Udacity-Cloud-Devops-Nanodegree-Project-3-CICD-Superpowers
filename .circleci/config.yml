@@ -30,6 +30,7 @@ commands:
           command: npm audit --audit-level=critical
       - run:
           name: Fix security issues
+          working_directory: "<< parameters.workingdir >>"
           command: npm audit fix
           when: on_fail
 
