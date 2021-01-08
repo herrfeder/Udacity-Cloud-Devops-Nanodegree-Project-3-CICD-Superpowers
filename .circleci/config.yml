@@ -27,15 +27,7 @@ commands:
       - run:
           name: Scanning the source defined in workingdir against npm audit
           working_directory: "<< parameters.workingdir >>"
-          command: | 
-                  npm audit
-                  true
-          # would be nicer to handle the error code of specific audit-level but complete workflow will fail
-      - run:
-          name: Fix security issues
-          working_directory: "<< parameters.workingdir >>"
-          command: npm audit fix
-
+          command: npm audit fix --audit-level=critical --force
 
   run-nodejs-tests:
     description: Run generic nodejs source code testing
