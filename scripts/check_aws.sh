@@ -16,6 +16,8 @@ then
 	   && aws --version
     else
 	   exit 1
+    fi
+
 else
     echo "aws client installed"
 fi
