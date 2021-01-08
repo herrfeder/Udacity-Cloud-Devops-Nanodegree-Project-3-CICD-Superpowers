@@ -12,7 +12,7 @@ then
     elif [ "$DISTRO" = "Alpine" ]; then
 	   apk add --no-cache python3 py3-pip \
 	   && pip3 install --upgrade pip \
-	   && pip3 install awscli \ 
+	   && pip3 install awscli \
 	   && aws --version
     else
 	   exit 1
