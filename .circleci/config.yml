@@ -54,8 +54,7 @@ commands:
         when: << parameters.when >>
      - run:
         name: Destroy backend
-        command: |
-           aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+        command: aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
         when: << parameters.when >>
      - run:
         name: Destroy frontend
@@ -401,13 +400,6 @@ jobs:
             then
               # your code here
             fi
-            
-  destroy-infrastructure-job:
-    executor: aws
-    steps:
-      - destroy-environment:
-          when: on_fail
-
 
 
 workflows:
