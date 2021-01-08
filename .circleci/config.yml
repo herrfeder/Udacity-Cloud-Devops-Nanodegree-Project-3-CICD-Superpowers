@@ -428,9 +428,6 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           context:
             - aws_vars
-          #filters:
-          #branches:
-          #only: master
       # I would like to set here an condition to run destroy-environment on failing jobs but this seems not possible right now in a single workflow
       - configure-infrastructure:
           requires: [deploy-infrastructure]
@@ -438,13 +435,20 @@ workflows:
             - aws_vars
       - run-migrations:
           requires: [configure-infrastructure]
+          context:
+            - aws_vars
       - deploy-01-frontend:
           requires: [run-migrations]
-          
+          context:
+            - aws_vars 
       - deploy-02-frontend:
           requires: [run-migrations]
+          context:  
+            - aws_vars
       - deploy-backend:
           requires: [run-migrations]
+          context:
+            - aws_vars 
       - smoke-test:
           requires: [deploy-backend, deploy-01-frontend, deploy-02-frontend]
       - cloudfront-update:
