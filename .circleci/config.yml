@@ -220,9 +220,9 @@ jobs:
             - .circleci/ansible/inventory
             - .circleci/ansible/backend_ip
           when: on_success
-      - destroy-environment:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
-          when: on_fail
+      #- destroy-environment:
+      #    id: ${CIRCLE_WORKFLOW_ID:0:7}
+      #    when: on_fail
 
 
 
@@ -406,6 +406,14 @@ jobs:
               # your code here
             fi
             
+  destroy-infrastructure-job:
+    executor: aws
+    steps:
+      - destroy-environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+
+
 
 workflows:
   default:
@@ -422,15 +430,24 @@ workflows:
           requires: [build-frontend]
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          context:
+            - aws_vars
+      - destroy-infrastructure-job:
+          context:
+            - aws_vars
+          when: on_fail
           #filters:
           #branches:
           #only: master
       - configure-infrastructure:
           requires: [deploy-infrastructure]
+          context:
+            - aws_vars
       - run-migrations:
           requires: [configure-infrastructure]
       - deploy-01-frontend:
           requires: [run-migrations]
+          
       - deploy-02-frontend:
           requires: [run-migrations]
       - deploy-backend:
