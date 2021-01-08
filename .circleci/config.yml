@@ -44,16 +44,23 @@ commands:
 
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks using CIRCE_WORKFLOW_ID.
+    parameters:
+      when:
+        type: string
+      id:
+        type: string
     steps:
-      - run:
+       - run:
           name: Destroy backend
           command: |
-            aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+             aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+          when: << parameters.when >>
       - run:
           name: Destroy frontend
           command: |
+            aws s3 rm s3://udapeople-s3-<< parameters.id >> --recursive
             aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
-
+          when: << parameters.when >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -213,7 +220,9 @@ jobs:
             - .circleci/ansible/inventory
             - .circleci/ansible/backend_ip
           when: on_success
-          #- destroy-environment
+      - destroy-environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
 
 
 
@@ -237,7 +246,9 @@ jobs:
           working_directory: .circleci
           command: |
             ansible-playbook -i ansible/inventory files/configure-server.yaml
-          #- destroy-environment
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
 
 
   run-migrations:
@@ -271,7 +282,9 @@ jobs:
           working_directory: ./backend
           command: |
             curl -H "Content-Type: text/plain" -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request PUT --data "$(migration_result)" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7}
-      - destroy-environment
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
 
 
   deploy-01-frontend:
@@ -295,7 +308,9 @@ jobs:
           paths: 
             - frontend/node_dist
           key: frontend-dist-${CIRCLE_WORKFLOW_ID:0:7}
-
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
        
 
   deploy-02-frontend:
@@ -309,7 +324,9 @@ jobs:
           working_directory: ./frontend
           command: |
             aws s3 cp ./dist "s3://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
-          #- destroy-environment:
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
 
                     
   deploy-backend:
@@ -329,8 +346,10 @@ jobs:
           name: Deploy backend
           working_directory: .circleci/ansible/
           command: |
-            ansible-playbook -i inventory deploy-backend.yml 
-          #- destroy-environment:
+            ansible-pla ybook -i inventory deploy-backend.yml 
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
 
 
   smoke-test:
@@ -405,7 +424,7 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
-               only: [test-feature-branch]
+               only: master
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
