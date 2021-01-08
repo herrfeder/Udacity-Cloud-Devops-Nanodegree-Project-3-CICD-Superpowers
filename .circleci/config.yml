@@ -244,7 +244,7 @@ jobs:
           name: Configure server
           working_directory: .circleci
           command: |
-            ansible-playbook -i ansible/inventory files/configure-server.yaml
+            ansible-playbook -i ansible/inventory files/configure-server.yml
       - destroy-environment:
           when: on_fail
 
