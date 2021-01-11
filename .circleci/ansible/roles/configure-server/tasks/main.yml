@@ -29,7 +29,5 @@
   become: true
   apt:
     name: pm2
-    global: yes
-    production: yes
     state: present
 
