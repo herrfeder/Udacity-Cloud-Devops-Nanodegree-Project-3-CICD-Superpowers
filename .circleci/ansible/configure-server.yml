@@ -6,7 +6,7 @@
   # when python is not present on target host gather_facts has to be set to no
   gather_facts: no
   vars:
-    - ansible_python_interpreter: /usr/bin/python3
+    - ansible_python_interpreter: /usr/bin/python
     - ansible_host_key_checking: false
     - ansible_stdout_callback: yaml
 
@@ -21,7 +21,7 @@
       connection: local
 
     - name: "install python for Ansible."
-      raw: 'sudo yum -y install python3'
+      raw: 'sudo yum -y install python'
 
   roles:
     - configure-server
