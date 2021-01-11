@@ -1,5 +1,6 @@
 ---
 - name: Ensure old versions of Docker are not installed.
+  become: true
   package:
     name:
       - docker
@@ -7,10 +8,12 @@
     state: absent
 
 - name: Ensure dependencies are installed.
+  become: true
   apt:
     name:
       - apt-transport-https
       - ca-certificates
+      - gnupg2
     state: present
 
 - name: Add Docker apt key.
@@ -26,6 +29,7 @@
   when: add_repository_key is failed
 
 - name: Add Docker apt key (alternative for older systems without SNI).
+  become: true
   shell: >
     curl -sSL {{ docker_apt_gpg_key }} | sudo apt-key add -
   args:
@@ -33,6 +37,7 @@
   when: add_repository_key is failed
 
 - name: Add Docker repository.
+  beocme: true
   apt_repository:
     repo: "{{ docker_apt_repository }}"
     state: present
@@ -40,19 +45,23 @@
 
 
 - name: Check current docker-compose version.
+  become: true
   command: docker-compose --version
   register: docker_compose_current_version
   changed_when: false
   failed_when: false
 
 - name: Delete existing docker-compose version if it's different.
+  become: true
   file:
     path: "{{ docker_compose_path }}"
     state: absent
   when: >
     docker_compose_current_version.stdout is defined
     and docker_compose_version not in docker_compose_current_version.stdout
+
 - name: Install Docker Compose (if configured).
+  become: true
   get_url:
     url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
     dest: "{{ docker_compose_path }}"
@@ -64,11 +73,13 @@
     state: directory
 
 - name: Copy index test page
+  become: true
   template:
     src: "files/docker-compose.yml"
     dest: "~/postgres-compose/docker-compose.yml"
 
 - name: run postgres compose docker-compose.yml
+  become: true
   docker_compose:
     project_src: "~/postgres-compose/docker-compose.yml"
 
