@@ -220,12 +220,6 @@ jobs:
         paths:
           - backend_ip
           - inventory
-      #- save_cache:
-      #    key: ansible-inventory-${CIRCLE_WORKFLOW_ID:0:7}
-      #    paths:
-      #      - .circleci/ansible/inventory
-      #      - .circleci/ansible/backend_ip
-      #    when: on_success
       - destroy-environment:
           when: on_fail
 
@@ -238,8 +232,6 @@ jobs:
           fingerprints: ["ab:72:a8:7d:c3:37:3b:5b:b0:4f:6b:58:bb:05:62:06"]
       - attach_workspace:
           at: .
-      #- restore_cache:
-      #    key: ansible-inventory-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Install dependencies
           working_directory: .circleci/ansible
