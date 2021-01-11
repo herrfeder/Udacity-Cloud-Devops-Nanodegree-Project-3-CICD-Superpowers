@@ -21,7 +21,7 @@
       connection: local
 
     - name: "install python for Ansible."
-      raw: 'sudo yum -y install python'
+      raw: 'sudo yum -y install python3'
 
   roles:
     - configure-server
