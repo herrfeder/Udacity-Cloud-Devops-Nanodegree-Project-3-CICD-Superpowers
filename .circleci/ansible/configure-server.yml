@@ -24,6 +24,7 @@
 
   roles:
     - configure-server
+    - install-postgres-compose
     - configure-prometheus-node-exporter
   environment:
     ENVIRONMENT: production

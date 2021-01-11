@@ -219,10 +219,10 @@ jobs:
           command: |
             cat .circleci/ansible/backend_ip >> .circleci/ansible/inventory
       - persist_to_workspace:
-          root: .circleci/ansible/
+          root: .
           paths:
-            - backend_ip
-            - inventory
+            - .circleci/ansible/backend_ip
+            - .circleci/ansible/inventory
       - destroy-environment:
           when: on_fail
 
