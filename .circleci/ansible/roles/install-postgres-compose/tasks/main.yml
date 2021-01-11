@@ -61,6 +61,7 @@
     - docker
 
 - name: Creates directory
+  become: true
   file:
     path: ~/postgres-compose
     state: directory
