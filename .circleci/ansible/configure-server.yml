@@ -2,7 +2,7 @@
 
 - name: "configuration play." 
   hosts: web
-  user: ubuntu
+  user: ec2-user
   # when python is not present on target host gather_facts has to be set to no
   gather_facts: no
   vars:
