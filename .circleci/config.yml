@@ -433,6 +433,7 @@ workflows:
           requires: [configure-infrastructure]
           context:
             - aws_vars
+            - udacity_devops_project3
       - deploy-01-frontend:
           requires: [run-migrations]
           context:
