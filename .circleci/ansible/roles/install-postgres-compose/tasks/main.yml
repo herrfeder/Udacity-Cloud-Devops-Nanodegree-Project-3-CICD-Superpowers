@@ -19,11 +19,9 @@
 - name: Add Docker apt key.
   become: true
   apt_key:
-    url: "{{ docker_apt_gpg_key }}"
-    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    url: https://download.docker.com/linux/ubuntu/gpg
     state: present
   register: add_repository_key
-  ignore_errors: "{{ docker_apt_ignore_key_error }}"
 
 - name: Ensure curl is present (on older systems without SNI).
   become: true
@@ -33,7 +31,7 @@
 - name: Add Docker apt key (alternative for older systems without SNI).
   become: true
   shell: >
-    curl -sSL {{ docker_apt_gpg_key }} | sudo apt-key add -
+    curl -sSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   args:
     warn: false
   when: add_repository_key is failed
@@ -41,7 +39,7 @@
 - name: Add Docker repository.
   become: true
   apt_repository:
-    repo: "{{ docker_apt_repository }}"
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
     state: present
     update_cache: true
 
@@ -53,21 +51,13 @@
   changed_when: false
   failed_when: false
 
-- name: Delete existing docker-compose version if it's different.
-  become: true
-  file:
-    path: "{{ docker_compose_path }}"
-    state: absent
-  when: >
-    docker_compose_current_version.stdout is defined
-    and docker_compose_version not in docker_compose_current_version.stdout
-
-- name: Install Docker Compose (if configured).
-  become: true
-  get_url:
-    url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
-    dest: "{{ docker_compose_path }}"
-    mode: 0755
+- name: Install docker-compose
+  apt:
+    name: docker-compose=1.8.*
+    state: present
+    update_cache: yes
+  tags:
+    - docker
 
 - name: Creates directory
   file:
