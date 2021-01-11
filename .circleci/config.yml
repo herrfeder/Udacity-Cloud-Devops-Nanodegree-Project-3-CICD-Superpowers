@@ -244,7 +244,7 @@ jobs:
           name: Check inventory file
           working_directory: .circleci
           command: |
-            cat ansible/inventory
+            ls ansible
       - run:
           name: Configure server
           working_directory: .circleci
@@ -409,18 +409,18 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-frontend
-      - build-backend
-      - test-frontend:
-          requires: [build-frontend]
-      - test-backend:
-          requires: [build-backend]
-      - scan-backend:
-          requires: [build-backend]
-      - scan-frontend:
-          requires: [build-frontend]
+      #- build-frontend
+      #- build-backend
+      #- test-frontend:
+      #    requires: [build-frontend]
+      #- test-backend:
+      #    requires: [build-backend]
+      #- scan-backend:
+      #    requires: [build-backend]
+      #- scan-frontend:
+      #    requires: [build-frontend]
       - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          #requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           context:
             - aws_vars
       # I would like to set here an condition to run destroy-environment on failing jobs but this seems not possible right now in a single workflow
