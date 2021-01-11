@@ -54,7 +54,7 @@
 - name: Install docker-compose
   become: true
   apt:
-    name: docker-compose=1.8.*
+    name: docker-compose
     state: present
     update_cache: yes
   tags:
