@@ -52,6 +52,7 @@
   failed_when: false
 
 - name: Install docker-compose
+  become: true
   apt:
     name: docker-compose=1.8.*
     state: present
