@@ -245,6 +245,7 @@ jobs:
           working_directory: .circleci
           command: |
             cat ansible/inventory
+            cat ansible/backend_ip
       - run:
           name: Configure server
           working_directory: .circleci

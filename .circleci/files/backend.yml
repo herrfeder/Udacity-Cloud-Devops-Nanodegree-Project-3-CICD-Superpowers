@@ -34,5 +34,5 @@ Resources:
       KeyName: ssh_access # If you use another key pair name, you should change this value to match.
       ImageId: !Ref LatestAmiId 
       Tags:
-        - Key: Name
+        - Key: project
           Value: !Sub udapeople-backend-${ID}
