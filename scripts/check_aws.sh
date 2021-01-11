@@ -2,11 +2,13 @@ if ! command -v aws &> /dev/null
 then
     DISTRO=$( cat /etc/*release | grep -oE -m1 "(Debian|Alpine)" )
     if [ "$DISTRO" = "Debian" ]; then
-	   apt install python3-pip \
+	   apt update \
+	   && apt install python3-pip \
 	   && pip3 install awscli \
 	   && aws --version
     elif [ "$DISTRO" = "Ubuntu" ]; then
- 	   apt install python3-pip \
+ 	   apt update \
+	   && apt install python3-pip \
 	   && pip3 install awscli \
 	   && aws --version
     elif [ "$DISTRO" = "Alpine" ]; then
