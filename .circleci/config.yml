@@ -241,6 +241,11 @@ jobs:
           command: |
             apk add --update ansible
       - run:
+          name: Check inventory file
+          working_directory: .circleci
+          command: |
+            cat ansible/inventory
+      - run:
           name: Configure server
           working_directory: .circleci
           command: |
