@@ -27,7 +27,9 @@
 
 - name: "install pm2"
   become: true
-  apt:
+  npm:
     name: pm2
+    global: yes
+    production: yes
     state: present
 
