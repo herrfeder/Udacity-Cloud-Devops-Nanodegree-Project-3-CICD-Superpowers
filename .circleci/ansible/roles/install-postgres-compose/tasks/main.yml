@@ -75,6 +75,6 @@
 - name: run postgres compose docker-compose.yml
   become: true
   docker_compose:
-    project_src: "~/postgres-compose/docker-compose.yml"
+    project_src: "~/postgres-compose/"
 
 # parts from here https://github.com/geerlingguy/ansible-role-docker/blob/master/tasks/setup-Debian.yml
