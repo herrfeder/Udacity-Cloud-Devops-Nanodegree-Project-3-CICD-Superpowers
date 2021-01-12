@@ -290,8 +290,8 @@ jobs:
           working_directory: ./backend
           command: |
             curl -H "Content-Type: text/plain" -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request PUT --data "$(migration_result)" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7}
-      #- destroy-environment:
-      #    when: on_fail
+      - destroy-environment:
+          when: on_fail
 
 
   deploy-01-frontend:
