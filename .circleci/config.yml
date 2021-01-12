@@ -430,6 +430,7 @@ workflows:
           requires: [deploy-infrastructure]
           context:
             - aws_vars
+            - udacity_devops_project3
       - run-migrations:
           requires: [configure-infrastructure]
           context:
