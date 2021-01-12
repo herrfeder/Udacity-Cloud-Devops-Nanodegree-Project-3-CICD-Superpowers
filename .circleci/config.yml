@@ -264,10 +264,14 @@ jobs:
       - restore_cache:
           keys: 
             - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
+      #- run:
+      #    name: get hostname or ip into environment variable
+          
       - run:
           name: Run migrations
           working_directory: ./backend
           command: |
+            export TYPEORM_HOST=$(cat ../.circleci/ansible/backend_ip)
             npm run migrations > migration_status
       - run:
           name: Save migration results to workspace
