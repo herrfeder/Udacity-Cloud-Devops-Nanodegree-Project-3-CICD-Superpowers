@@ -4,8 +4,8 @@ services:
   database:
     image: "postgres"
     environment:
-      - POSTGRES_USER="${TYPEORM_USERNAME}"
-      - POSTGRES_PASSWORD="${TYPEORM_PASSWORD}"
-      - POSTGRES_DB="${TYPEORM_DATABASE}"
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=securepassword
+      - POSTGRES_DB=glee
     ports:
       - "127.0.0.1:5532:5432"
