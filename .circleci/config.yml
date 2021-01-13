@@ -383,9 +383,9 @@ jobs:
             else
               return 0
             fi
-      - destroy_environment:
+      - destroy-environment:
           when: on_fail
-      - revert_migrations:
+      - revert-migrations:
           when: on_fail
  
 
@@ -403,7 +403,7 @@ jobs:
               --stack-name udapeople-cloudfront-production \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople
-      - revert_migrations:
+      - revert-migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
           when: on_fail
       - destroy-environment:
@@ -417,15 +417,19 @@ jobs:
       - run:
           name: Get old stack workflow id
           command: |
-            # your code here
-            export OldWorkflowID="the id here"
-            export STACKS=[] #put the list of stacks here
+            export OldWorkflowID=$(aws cloudformation \
+              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+              --no-paginate --output text)
+
+            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+              --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
       - run:
           name: Remove old stacks and files
           command: |
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
-              # your code here
+              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+              aws s3 rm "s3://udapeople-s3-${OldWorkflowID}" --recursive
             fi
 
 
@@ -446,6 +450,10 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           context:
             - aws_vars
+          filters:
+            branches:
+              only:
+                - master
       # I would like to set here an condition to run destroy-environment on failing jobs but this seems not possible right now in a single workflow
       - configure-infrastructure:
           requires: [deploy-infrastructure]
@@ -471,7 +479,13 @@ workflows:
             - aws_vars 
       - smoke-test:
           requires: [deploy-backend, deploy-01-frontend, deploy-02-frontend]
+          context:
+            - aws_vars
       - cloudfront-update:
           requires: [smoke-test]
+          context:
+            - aws_vars
       - cleanup:
           requires: [cloudfront-update]
+          context:
+            - aws_vars
