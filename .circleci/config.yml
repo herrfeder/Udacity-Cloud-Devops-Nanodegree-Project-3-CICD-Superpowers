@@ -134,6 +134,12 @@ jobs:
             - backend/node_modules
             - backend/dist
           key: backend-build-${CIRCLE_WORKFLOW_ID:0:7}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - backend/node_modules
+            - backend/dist
+
 
   
   ###### TESTING #######
@@ -178,11 +184,11 @@ jobs:
             - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run-nodejs-scan:
           workingdir: "./backend"
-      - persist_to_workspace:
-          root: .
-          paths:
-            - backend/node_modules
-            - backend/dist
+          #- persist_to_workspace:
+          #root: .
+          #paths:
+          #  - backend/node_modules
+          #  - backend/dist
 
 
 
@@ -266,12 +272,9 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-          #- restore_cache:
-          #keys: 
-          #  - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
-      #- run:
-      #    name: get hostname or ip into environment variable
-          
+      - restore_cache:
+          keys: 
+            - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Run migrations
           working_directory: ./backend
