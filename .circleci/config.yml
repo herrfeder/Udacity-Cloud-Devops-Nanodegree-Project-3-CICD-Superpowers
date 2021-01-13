@@ -18,7 +18,7 @@ commands:
     steps:  
       - run:
           name: Install dependencies
-          command: yum install -y tar gzip
+          command: yum install -y tar gzip curl
 
   run-nodejs-scan:
     description: Run generic nodejs source code and dependency scanning
@@ -70,28 +70,23 @@ commands:
           aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
         when: << parameters.when >>
 
+
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      # Add parameter here     
+      when:
+        type: string
     steps:
       - run:
-          name: Revert migrations
-          # Add when this will run
+          working_directory: ./backend
           command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
-            if(( $SUCCESS==1 )); 
+            SUCCESS=$(curl -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7})
+            echo $SUCCESS
+            if [[ "$SUCCESS" == "true" ]]
             then
-                cd backend
-                npm run migrations:revert
-                cd ..
-                cd frontend
-                npm run migrations:revert
-                cd ..
+              npm run migrations:revert
             fi
-
-            
+          when: << parameters.when >>            
 jobs:
 
   #######################
@@ -184,11 +179,6 @@ jobs:
             - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run-nodejs-scan:
           workingdir: "./backend"
-          #- persist_to_workspace:
-          #root: .
-          #paths:
-          #  - backend/node_modules
-          #  - backend/dist
 
 
 
@@ -370,40 +360,54 @@ jobs:
 
 
   smoke-test:
-    executor: python
+    executor: node
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            # your code here
-      - run:
-          name: Get backend url
-          command: |
-            # your code here
+      - attach_workspace:
+          at: .
       - run:
           name: Backend smoke test.
+          working_directory: ./circleci/ansible
           command: |
-            # your code here
+            export BACKEND_IP=$(cat backend_ip)
+            export BACKEND_URL="http://$BACKEND_IP:3030/api/status"
+            curl "$BACKEND_URL/api/status"
       - run:
           name: Frontend smoke test.
+          working_directory: ./backend
           command: |
-            # your code here
-      # Here's where you will add some code to rollback on failure  
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.eu-central-1.amazonaws.com/index.html"
+            curl -s ${URL} | grep -q "Welcome"
+            then
+              return 1
+            else
+              return 0
+            fi
+      - destroy_environment:
+          when: on_fail
+      - revert_migrations:
+          when: on_fail
+ 
 
   cloudfront-update:
     executor: aws
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            # your code here
+      - aws-install-dependencies
       - run:
           name: Update cloudfront distribution
+          working_directory: ./.circleci/files
           command: |
-            # your code here
-      # Here's where you will add some code to rollback on failure  
+            aws cloudformation deploy \
+              --template-file cloudfront.yaml \
+              --stack-name udapeople-cloudfront-production \
+              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags project=udapeople
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+      - destroy-environment:
+          when: on_fail
 
   cleanup:
     executor: aws
