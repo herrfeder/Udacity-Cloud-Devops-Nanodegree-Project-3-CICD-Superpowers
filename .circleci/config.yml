@@ -191,10 +191,7 @@ jobs:
     executor: aws
     steps:
       - checkout
-      - aws
-      - run:
-          name: Install dependencies
-          command: yum install -y tar gzip
+      - aws-install-dependencies
       - run:
           name: Ensure back-end infrastructure exists
           command: |
