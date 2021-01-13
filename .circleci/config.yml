@@ -296,6 +296,10 @@ jobs:
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
       - run:
+          name: Install frontend dependencies
+          working_directory: ./frontend
+          command: npm install
+      - run:
           name: Build front-end
           working_directory: ./frontend
           command: npm run build
@@ -421,7 +425,7 @@ workflows:
       - deploy-01-frontend:
           requires: [run-migrations]
       - deploy-02-frontend:
-          requires: [run-migrations]
+          requires: [run-migrations, deploy-01-frontend]
       - deploy-backend:
           requires: [run-migrations]
       - smoke-test:
