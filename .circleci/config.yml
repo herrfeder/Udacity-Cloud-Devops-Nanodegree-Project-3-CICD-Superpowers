@@ -13,6 +13,13 @@ executors:
 
 
 commands:
+  aws-install-dependencies:
+    description: install necessary utilities for aws client
+    steps:  
+      - run:
+          name: Install dependencies
+          command: yum install -y tar gzip
+
   run-nodejs-scan:
     description: Run generic nodejs source code and dependency scanning
     parameters:
@@ -184,6 +191,7 @@ jobs:
     executor: aws
     steps:
       - checkout
+      - aws
       - run:
           name: Install dependencies
           command: yum install -y tar gzip
@@ -327,6 +335,7 @@ jobs:
     executor: aws
     steps:
       - checkout
+      - aws-install-dependencies
       - restore_cache:
           keys: 
             - frontend-dist-${CIRCLE_WORKFLOW_ID:0:7}
@@ -401,6 +410,7 @@ jobs:
     executor: aws
     steps:
       - checkout
+      - aws-install-dependencies
       - run:
           name: Get old stack workflow id
           command: |
