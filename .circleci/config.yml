@@ -323,10 +323,10 @@ jobs:
           name: Build front-end
           working_directory: ./frontend
           command: npm run build
-      - save_cache:
+      - persist_to_workspace:
+          root: .
           paths: 
             - frontend/dist
-          key: frontend-dist-${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:
           when: on_fail
        
@@ -335,10 +335,8 @@ jobs:
     executor: aws
     steps:
       - checkout
-      - aws-install-dependencies
-      - restore_cache:
-          keys: 
-            - frontend-dist-${CIRCLE_WORKFLOW_ID:0:7}
+      - attach_workspace:
+          at: .
       - run:
           name: Copy frontend build to s3 bucket
           working_directory: ./frontend
