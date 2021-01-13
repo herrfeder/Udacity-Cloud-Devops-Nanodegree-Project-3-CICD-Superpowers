@@ -178,11 +178,11 @@ jobs:
             - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run-nodejs-scan:
           workingdir: "./backend"
-      - save_cache:
+      - persist_to_workspace:
+          root: .
           paths:
             - backend/node_modules
             - backend/dist
-          key: backend-build-${CIRCLE_WORKFLOW_ID:0:7}
 
 
 
@@ -322,7 +322,7 @@ jobs:
           command: npm run build
       - save_cache:
           paths: 
-            - frontend/node_dist
+            - frontend/dist
           key: frontend-dist-${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:
           when: on_fail
