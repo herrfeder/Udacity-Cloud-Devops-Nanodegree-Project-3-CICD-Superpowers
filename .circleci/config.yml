@@ -335,6 +335,7 @@ jobs:
     executor: aws
     steps:
       - checkout
+      - aws-install-dependencies
       - attach_workspace:
           at: .
       - run:
