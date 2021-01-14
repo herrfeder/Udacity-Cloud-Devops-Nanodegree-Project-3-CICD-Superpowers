@@ -369,6 +369,8 @@ jobs:
           name: Backend smoke test.
           working_directory: ./circleci/ansible
           command: |
+            pwd
+            ls -la
             export BACKEND_IP=$(cat backend_ip)
             export BACKEND_URL="http://$BACKEND_IP:3030/api/status"
             curl "$BACKEND_URL/api/status"
