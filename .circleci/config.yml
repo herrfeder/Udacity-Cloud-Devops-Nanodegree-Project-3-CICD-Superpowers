@@ -367,7 +367,7 @@ jobs:
           at: .
       - run:
           name: Backend smoke test.
-          working_directory: ./circleci/ansible
+          working_directory: ./.circleci/ansible
           command: |
             # new
             pwd
