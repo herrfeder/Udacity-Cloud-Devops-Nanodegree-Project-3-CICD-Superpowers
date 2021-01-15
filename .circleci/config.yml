@@ -384,10 +384,10 @@ jobs:
             else
               return 0
             fi
-      - destroy-environment:
-          when: on_fail
-      - revert-migrations:
-          when: on_fail
+      #- destroy-environment:
+      #    when: on_fail
+      #- revert-migrations:
+      #    when: on_fail
  
 
   cloudfront-update:
