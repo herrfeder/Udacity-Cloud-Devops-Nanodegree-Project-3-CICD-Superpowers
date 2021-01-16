@@ -183,7 +183,7 @@ jobs:
 
 
 
-  deploy-infrastructure-frontend-backend:
+  deploy-infrastructure:
     executor: aws
     steps:
       - checkout
