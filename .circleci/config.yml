@@ -375,9 +375,6 @@ jobs:
           name: Backend smoke test.
           working_directory: ./.circleci/ansible
           command: |
-            # new
-            pwd
-            ls -la
             export BACKEND_IP=$(cat backend_ip)
             export BACKEND_URL="http://$BACKEND_IP:3030/api/status"
             curl "$BACKEND_URL/api/status"
@@ -392,10 +389,10 @@ jobs:
             else
               return 0
             fi
-      - destroy-environment:
-          when: on_fail
-      - revert-migrations:
-          when: on_fail
+      #- destroy-environment:
+      #    when: on_fail
+      #- revert-migrations:
+      #    when: on_fail
  
 
   cloudfront-update:
