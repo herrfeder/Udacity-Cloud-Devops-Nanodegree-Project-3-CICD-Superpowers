@@ -287,7 +287,13 @@ jobs:
           name: Save migration status to memstash
           working_directory: ./backend
           command: |
-            curl -H "Content-Type: text/plain" -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request PUT --data "$(migration_result)" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7}
+            curl -H "Content-Type: text/plain" -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request PUT --data "$(cat migration_result)" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - backend/node_modules
+            - backend/dist
+          when: on_success
       - destroy-environment:
           when: on_fail
 
@@ -386,10 +392,10 @@ jobs:
             else
               return 0
             fi
-      #- destroy-environment:
-      #    when: on_fail
-      #- revert-migrations:
-      #    when: on_fail
+      - destroy-environment:
+          when: on_fail
+      - revert-migrations:
+          when: on_fail
  
 
   cloudfront-update:
