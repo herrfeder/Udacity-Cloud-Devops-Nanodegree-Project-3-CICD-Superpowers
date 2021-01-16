@@ -360,6 +360,7 @@ jobs:
           name: Deploy backend
           working_directory: .circleci/ansible/
           command: |
+            export TYPEORM_HOST=$(cat backend_ip)
             ansible-playbook -i inventory deploy-backend.yml 
       - destroy-environment:
           when: on_fail
