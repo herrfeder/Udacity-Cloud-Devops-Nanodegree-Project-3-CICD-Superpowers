@@ -183,7 +183,7 @@ jobs:
 
 
 
-  deploy-infrastructure:
+  deploy-infrastructure-frontend-backend:
     executor: aws
     steps:
       - checkout
@@ -226,6 +226,7 @@ jobs:
             - .circleci/ansible/inventory
       - destroy-environment:
           when: on_fail
+
 
 
   configure-infrastructure:
@@ -390,10 +391,10 @@ jobs:
             else
               return 0
             fi
-      #- destroy-environment:
-      #    when: on_fail
-      #- revert-migrations:
-      #    when: on_fail
+      - destroy-environment:
+          when: on_fail
+      - revert-migrations:
+          when: on_fail
  
 
   cloudfront-update:
