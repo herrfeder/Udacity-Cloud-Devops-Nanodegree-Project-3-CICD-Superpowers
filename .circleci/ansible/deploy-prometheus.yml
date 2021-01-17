@@ -18,5 +18,5 @@
     EC2_SECRET_KEY: "{{ lookup('env', 'EC2_SECRET_KEY') }}"
     NODE_EXP_TARGET_URL: "{{ lookup('env', 'NODE_EXP_TARGET_URL') }}"
     TELEGRAM_ADMIN: "{{ lookup('env', 'TELEGRAM_ADMIN') }}"
-    TELEGRAM_TOKEN: "{{ lookup('env', 'TELEGRAM_TOKEN) }}"
+    TELEGRAM_TOKEN: "{{ lookup('env', 'TELEGRAM_TOKEN') }}"
     
