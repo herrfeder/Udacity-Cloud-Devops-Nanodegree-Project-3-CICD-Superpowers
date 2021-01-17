@@ -40,4 +40,4 @@ Resources:
       ImageId: !Ref LatestAmiId 
       Tags:
         - Key: project
-          Value: !Sub udapeople-prometheus-${ID}
+          Value: !Sub udapeople-logging-${ID}
