@@ -86,6 +86,7 @@ commands:
       - run:
           working_directory: ./backend
           command: |
+            export TYPEORM_HOST=$(cat ../.circleci/ansible/backend_ip)
             SUCCESS=$(curl -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7})
             echo $SUCCESS
             if [[ "$SUCCESS" == "true" ]]
@@ -441,9 +442,9 @@ jobs:
             FRONTEND_LIVE=$(curl -s ${URL} | grep -o "Welcome")
             if [[ $FRONTEND_LIVE == "Welcome" ]]
             then
-              return 0
+              exit 0
             else
-              return 1
+              exit 1
             fi
       - revert-migrations:
           when: on_fail
