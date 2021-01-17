@@ -1,4 +1,7 @@
 ---
+- name: Update all packages to the latest version
+  apt: {upgrade: dist}
+
 - name: Ensure old versions of Docker are not installed.
   become: true
   package:
