@@ -69,7 +69,7 @@ commands:
           aws s3 rm s3://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7} --recursive
           aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
         when: << parameters.when >>
-      - run:
+     - run:
         name: Destroy logging
         command: |
           aws cloudformation delete-stack --stack-name "udapeople-logging-${CIRCLE_WORKFLOW_ID:0:7}"
