@@ -183,7 +183,7 @@ jobs:
 
 
 
-  deploy-infrastructure:
+  deploy-infrastructure-frontend-backend:
     executor: aws
     steps:
       - checkout
@@ -227,6 +227,43 @@ jobs:
       - destroy-environment:
           when: on_fail
 
+  
+  deploy-infrastructure-prometheus:
+    executor: aws
+    steps:
+      - checkout
+      - aws-install-dependencies
+      - run:
+          name: Ensure logging infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/prometheus.yml \
+              --tags project="udapeople-logging-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name "udapeople-logging-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7} 
+      - run:
+          name: Prepare ansible inventory file
+          command: |
+            echo "[logging]" > .circleci/ansible/inventory-logging
+      - run:
+          name: Extract Logging IP
+          command: |
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople-logging-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text >> .circleci/ansible/logging_ip
+      - run:
+          name: Add logging IP to inventory
+          command: |
+            cat .circleci/ansible/logging_ip >> .circleci/ansible/inventory-logging
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .circleci/ansible/logging_ip
+            - .circleci/ansible/inventory-logging
+      - destroy-environment:
+          when: on_fail
+
 
 
   configure-infrastructure:
@@ -246,13 +283,21 @@ jobs:
           name: Check inventory file
           working_directory: .circleci
           command: |
+            echo "Backend->"
             cat ansible/inventory
-            cat ansible/backend_ip
+            echo "Logging->"
+            cat ansible/inventory-logging
       - run:
-          name: Configure server
+          name: Configure backend server
           working_directory: .circleci
           command: |
             ansible-playbook -i ansible/inventory ansible/configure-server.yml
+      - run:
+          name: Configure logging server
+          working_directory: .circleci
+          command: |
+            export NODE_EXP_TARGET_URL=$(cat ansible/backend_ip)
+            ansible-playbook -i ansible/inventory-logging ansible/deploy-prometheus.yml
       - destroy-environment:
           when: on_fail
 
@@ -366,7 +411,6 @@ jobs:
       - destroy-environment:
           when: on_fail
 
-
   smoke-test:
     executor: node
     steps:
@@ -384,17 +428,17 @@ jobs:
           name: Frontend smoke test.
           working_directory: ./backend
           command: |
-            URL="http://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.eu-central-1.amazonaws.com/index.html"
+            URL="http://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.us-west-2.amazonaws.com/index.html"
             curl -s ${URL} | grep -q "Welcome"
             then
               return 1
             else
               return 0
             fi
-      #- revert-migrations:
-      #    when: on_fail
-      #- destroy-environment:
-      #    when: on_fail
+      - revert-migrations:
+          when: on_fail
+      - destroy-environment:
+          when: on_fail
       
   cloudfront-update:
     executor: aws
@@ -452,7 +496,7 @@ workflows:
           requires: [build-backend]
       - scan-frontend:
           requires: [build-frontend]
-      - deploy-infrastructure:
+      - deploy-infrastructure-frontend-backend:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           context:
             - aws_vars
@@ -461,11 +505,22 @@ workflows:
               only:
                 - master
       # I would like to set here an condition to run destroy-environment on failing jobs but this seems not possible right now in a single workflow
+      - deploy-infrastructure-prometheus:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          context:
+            - aws_vars
+          filters:
+            branches:
+              only:
+                - master
+
       - configure-infrastructure:
-          requires: [deploy-infrastructure]
+          requires: [deploy-infrastructure-frontend-backend, deploy-infrastructure-prometheus]
           context:
             - aws_vars
             - udacity_devops_project3
+            - alertmanager_bot
+            - prom_ec2_read
       - run-migrations:
           requires: [configure-infrastructure]
           context:

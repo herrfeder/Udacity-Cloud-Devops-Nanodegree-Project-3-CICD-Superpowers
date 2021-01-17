@@ -1,0 +1,5 @@
+receivers:
+- name: 'alertmananger-bot'
+  webhook_configs:
+  - send_resolved: true
+    url: 'http://localhost:8080'

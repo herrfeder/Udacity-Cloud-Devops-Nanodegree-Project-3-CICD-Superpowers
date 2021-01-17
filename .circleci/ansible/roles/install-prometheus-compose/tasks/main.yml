@@ -1,0 +1,46 @@
+---
+- name: Creates directory
+  become: true
+  file:
+    path: ~/prometheus-stack
+    state: directory
+
+- name: Creates directory
+  become: true
+  file:
+    path: ~/prometheus-stack/alertmanager
+    state: directory
+
+- name: Creates directory
+  become: true
+  file:
+    path: ~/prometheus-stack/prometheus
+    state: directory
+
+- name: Copy prometheus config file
+  become: true
+  template:
+    src: "files/prometheus/prometheus.yml"
+    dest: "~/prometheus-stack/prometheus/prometheus.yml"
+
+#### needs replacement of environment variables into file
+
+- name: Copy alertmanager config file
+  become: true
+  template:
+    src: "files/alertmanager/config.yml"
+    dest: "~/prometheus-stack/alertmanager/config.yml"
+
+- name: Copy docker compose file
+  become: true
+  template:
+    src: "files/docker-compose.yml"
+    dest: "~/prometheus-stack/docker-compose.yml"
+
+#### needs replacement of environment variables into file
+
+- name: run prometheus stack docker-compose.yml
+  become: true
+  docker_compose:
+    project_src: "~/prometheus-stack/"
+

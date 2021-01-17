@@ -25,6 +25,7 @@
 
   roles:
     - configure-server
+    - install-docker-dockercompose
     - install-postgres-compose
     - configure-prometheus-node-exporter
   environment:
