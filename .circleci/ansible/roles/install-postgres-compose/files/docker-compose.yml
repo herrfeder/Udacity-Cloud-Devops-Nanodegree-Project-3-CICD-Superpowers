@@ -4,8 +4,8 @@ services:
   database:
     image: "postgres"
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=securepassword
-      - POSTGRES_DB=glee
+      - POSTGRES_USER={{ lookup('env','TYPEORM_USERNAME') }}
+      - POSTGRES_PASSWORD={{ lookup('env','TYPEORM_PASSWORD') }}
+      - POSTGRES_DB={{ lookup('env','TYPEORM_DATABASE') }}
     ports:
       - "0.0.0.0:5432:5432"
