@@ -573,28 +573,28 @@ workflows:
       #    context:
       #      - aws_vars
       #      - udacity_devops_project3 
-      - deploy-02-frontend:
-          requires: [run-migrations, deploy-01-frontend]
-          context:  
-            - aws_vars
-            - udacity_devops_project3
-      - deploy-backend:
-          requires: [run-migrations]
-          context:
-            - aws_vars
-             - udacity_devops_project3 
-      - smoke-test:
-          requires: [deploy-backend, deploy-01-frontend, deploy-02-frontend]
-          context:
-            - aws_vars
-             - udacity_devops_project3
-      - cloudfront-update:
-          requires: [smoke-test]
-          context:
-            - aws_vars
-             - udacity_devops_project3
-      - cleanup:
-          requires: [cloudfront-update]
-          context:
-            - aws_vars
-            - udacity_devops_project3
+      #- deploy-02-frontend:
+      #    requires: [run-migrations, deploy-01-frontend]
+      #    context:  
+      #      - aws_vars
+      #      - udacity_devops_project3
+      #- deploy-backend:
+      #    requires: [run-migrations]
+      #    context:
+      #      - aws_vars
+      #      - udacity_devops_project3 
+      #- smoke-test:
+      #    requires: [deploy-backend, deploy-01-frontend, deploy-02-frontend]
+      #    context:
+      #      - aws_vars
+      #      - udacity_devops_project3
+      #- cloudfront-update:
+      #    requires: [smoke-test]
+      #    context:
+      #      - aws_vars
+      #      - udacity_devops_project3
+      #- cleanup:
+      #    requires: [cloudfront-update]
+      #    context:
+      #      - aws_vars
+      #      - udacity_devops_project3
