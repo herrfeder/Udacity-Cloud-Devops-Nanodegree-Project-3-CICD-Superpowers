@@ -69,6 +69,12 @@ commands:
           aws s3 rm s3://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7} --recursive
           aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
         when: << parameters.when >>
+      - run:
+        name: Destroy logging
+        command: |
+          aws cloudformation delete-stack --stack-name "udapeople-logging-${CIRCLE_WORKFLOW_ID:0:7}"
+        when: << parameters.when >>
+
 
 
   revert-migrations:
@@ -316,6 +322,9 @@ jobs:
           working_directory: ./backend
           command: |
             export TYPEORM_HOST=$(cat ../.circleci/ansible/backend_ip)
+            export TYPEORM_USERNAME=$(echo $TYPEORM_USERNAME)
+            export TYPEORM_PASSWORD=$(echo $TYPEORM_PASSWORD)
+            export TYPEORM_DATABASE=$(echo $TYPEORM_DATABASE)
             npm run migrations > migration_status
       - run:
           name: Save migration results to workspace
