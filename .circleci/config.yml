@@ -438,11 +438,12 @@ jobs:
           working_directory: ./backend
           command: |
             URL="http://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.us-west-2.amazonaws.com/index.html"
-            curl -s ${URL} | grep -q "Welcome"
+            FRONTEND_LIVE=$(curl -s ${URL} | grep -o "Welcome")
+            if [[ $FRONTEND_LIVE == "Welcome" ]]
             then
-              return 1
-            else
               return 0
+            else
+              return 1
             fi
       - revert-migrations:
           when: on_fail
