@@ -594,7 +594,7 @@ workflows:
             - aws_vars
              - udacity_devops_project3
       - cleanup:
-           requires: [cloudfront-update]
+          requires: [cloudfront-update]
           context:
             - aws_vars
             - udacity_devops_project3
