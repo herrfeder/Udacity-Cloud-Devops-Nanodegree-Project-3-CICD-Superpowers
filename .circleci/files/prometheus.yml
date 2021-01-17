@@ -1,0 +1,43 @@
+Description: >
+  UdaPeople backend stack.
+
+Parameters:
+  ID:
+    Description: Unique identifier.
+    Type: String
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id'
+
+Resources:
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub udapeople-security-prometheus-${ID}
+      GroupDescription: Allow port 22 and port 8080 and port 9090.
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 9090
+          ToPort: 9090
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.small
+      SecurityGroups:
+        - Ref: InstanceSecurityGroup
+      KeyName: ssh_access
+      ImageId: !Ref LatestAmiId 
+      Tags:
+        - Key: project
+          Value: !Sub udapeople-prometheus-${ID}
