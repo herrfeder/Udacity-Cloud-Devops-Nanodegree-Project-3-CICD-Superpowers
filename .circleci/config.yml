@@ -84,6 +84,10 @@ commands:
         type: string
     steps:
       - run:
+          name: Check existence of aws cli and install it
+          command: sh scripts/check_aws.sh
+          when: << parameters.when >>
+      - run:
           working_directory: ./backend
           command: |
             export TYPEORM_HOST=$(cat ../.circleci/ansible/backend_ip)
@@ -452,19 +456,21 @@ jobs:
           when: on_fail
       
   cloudfront-update:
-    executor: aws
+    executor: node
     steps:
       - checkout
-      - aws-install-dependencies
+      - run:
+          name: Check existence of aws cli and install it
+          command: sh scripts/check_aws.sh
       - run:
           name: Update cloudfront distribution
           working_directory: ./.circleci/files
           command: |
             aws cloudformation deploy \
-              --template-file cloudfront.yaml \
+              --template-file cloudfront.yml \
               --stack-name udapeople-cloudfront-production \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=udapeople
+              --tags project="udapeople-cloudfront"
       - revert-migrations:
           when: on_fail
       - destroy-environment:
