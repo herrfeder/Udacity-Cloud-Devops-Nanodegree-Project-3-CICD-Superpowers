@@ -384,19 +384,18 @@ jobs:
           name: Frontend smoke test.
           working_directory: ./backend
           command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.eu-central-1.amazonaws.com/index.html"
+            URL="http://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.eu-central-1.amazonaws.com/index.html"
             curl -s ${URL} | grep -q "Welcome"
             then
               return 1
             else
               return 0
             fi
-      - destroy-environment:
-          when: on_fail
       - revert-migrations:
           when: on_fail
- 
-
+      - destroy-environment:
+          when: on_fail
+      
   cloudfront-update:
     executor: aws
     steps:
