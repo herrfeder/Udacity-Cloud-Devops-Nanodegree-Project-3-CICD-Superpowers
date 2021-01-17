@@ -1,6 +1,10 @@
 ---
 - name: Update all packages to the latest version
   become: true
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: Update all packages to the latest version
+  become: true
   apt: {upgrade: dist}
 
 - name: Ensure old versions of Docker are not installed.
