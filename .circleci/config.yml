@@ -311,9 +311,9 @@ jobs:
           name: Configure logging server
           working_directory: .circleci
           command: |
-            ls ansible
             cat ansible/inventory-logging
             export NODE_EXP_TARGET_URL=$(cat ansible/backend_ip)
+            export LOGGING_HOST=$(cat ansible/logging_ip)
             ansible-playbook -i ansible/inventory-logging ansible/deploy-prometheus.yml
       - destroy-environment:
           when: on_fail
