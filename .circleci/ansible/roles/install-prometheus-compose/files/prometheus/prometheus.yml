@@ -12,5 +12,5 @@ scrape_configs:
         secret_key: "{{ lookup('env', 'EC2_SECRET_KEY') }}"
         port: 9100
   - job_name: 'node_exporter'
-      static_configs:
-        - targets: ["{{ lookup('env', 'NODE_EXP_TARGET_URL') }}:9100"]
+    static_configs:
+      - targets: ["{{ lookup('env', 'NODE_EXP_TARGET_URL') }}:9100"]
