@@ -19,9 +19,9 @@ services:
       TELEGRAM_TOKEN: {{ lookup('env','TELEGRAM_TOKEN') }}
     image: metalmatze/alertmanager-bot:0.4.3
     networks:
-    - alertmanager-bot
+    - prometheus
     ports:
-    - 8080:8080
+    - 127.0.0.1:8080:8080
     restart: always
     volumes:
     - alertmanager_bot_data:/data
