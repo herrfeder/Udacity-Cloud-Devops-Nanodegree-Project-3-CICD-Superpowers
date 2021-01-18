@@ -10,7 +10,7 @@ services:
 
   alertmanager-bot:
     command:
-    - --alertmanager.url=http://localhost:9093
+    - --alertmanager.url=http://{{ lookup('env', 'LOGGING_HOST') }}:9093
     - --log.level=info
     - --store=bolt
     - --bolt.path=/data/bot.db
@@ -21,7 +21,7 @@ services:
     networks:
     - prometheus
     ports:
-    - 127.0.0.1:8080:8080
+    - 8080:8080
     restart: always
     volumes:
     - alertmanager_bot_data:/data
@@ -49,7 +49,7 @@ services:
   alertmanager:
     image: prom/alertmanager
     ports:
-      - 127.0.0.1:9093:9093
+      - 9093:9093
     volumes:
       - ./alertmanager/:/etc/alertmanager/
     networks:

@@ -25,9 +25,14 @@ Resources:
           ToPort: 9090
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
+          FromPort: 9093
+          ToPort: 9093
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
           CidrIp: 0.0.0.0/0
+
 
 
   EC2Instance:
