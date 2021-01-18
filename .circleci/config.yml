@@ -498,14 +498,20 @@ jobs:
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
 
             export S3_BUCKETS=($(aws s3 ls | cut -d" " -f3)) 
+            
+            echo "${S3_BUCKETS[@]}"
+            echo "${STACKS[@]}"
+            echo "$CurrentWorkflowID"
+
  
       - run:
           name: Remove old stacks and files
           command: |
             # empty all S3 Buckets that aren't tagged with current WorkflowID
             for s3 in ${S3_BUCKETS[@]}; do 
-              if [[ ! "$s3" =~ "${CurrentWorkflowID}" ]]; 
+              if [[ ! "$s3" =~ "$CurrentWorkflowID" ]]; 
                 then
+                  echo "Removing Bucket $s3"
                   aws s3 rm "s3://$s3" --recursive
               fi
             done
@@ -514,10 +520,10 @@ jobs:
             for stack in ${STACKS[@]}; do 
               if [[ ! "$stack" =~ "${CurrentWorkflowID}" ]]
                 then
+                  echo "Removing Stack $stack"
                   aws cloudformation delete-stack --stack-name "$stack"
                 fi
             done
-
             
 workflows:
   default:
