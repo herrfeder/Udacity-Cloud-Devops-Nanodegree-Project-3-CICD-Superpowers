@@ -23,7 +23,12 @@
     src: "files/prometheus/prometheus.yml"
     dest: "~/prometheus-stack/prometheus/prometheus.yml"
 
-#### needs replacement of environment variables into file
+- name: Copy prometheus rules file
+  become: true
+  template:
+    src: "files/prometheus/rules.yml"
+    dest: "~/prometheus-stack/prometheus/rules.yml"
+
 
 - name: Copy alertmanager config file
   become: true
@@ -37,7 +42,6 @@
     src: "files/docker-compose.yml"
     dest: "~/prometheus-stack/docker-compose.yml"
 
-#### needs replacement of environment variables into file
 
 - name: run prometheus stack docker-compose.yml
   become: true

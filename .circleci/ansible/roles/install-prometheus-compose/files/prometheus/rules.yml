@@ -1,0 +1,29 @@
+groups:
+- name: Down
+  rules:
+  - alert: InstanceDown
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: "Instance  is down"
+      description: " of job  has been down for more than 1 minutes."
+- name: Network
+  rules:
+    - alert: HostUnusualNetworkThroughputIn
+      expr: sum by (instance) (rate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 10
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Host unusual network throughput in (instance {{ $labels.instance }})"
+        description: "Host network interfaces are probably receiving too much data (> 10 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HostUnusualNetworkThroughputOut
+      expr: sum by (instance) (rate(node_network_transmit_bytes_total[2m])) / 1024 / 1024 > 10
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Host unusual network throughput out (instance {{ $labels.instance }})"
+        description: "Host network interfaces are probably sending too much data (> 10 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"

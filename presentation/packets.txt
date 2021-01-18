@@ -1,0 +1,5 @@
+texlive-pictures
+texlive-extra-utils
+texlive-base
+texlive-latex-extra
+pandoc
