@@ -9,7 +9,7 @@ Parameters:
 
 Resources:
   
-  CloudFrontOriginAccessIdentity:
+  CloudFrontOriginAccessIdentity01:
     Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
     Properties:
       CloudFrontOriginAccessIdentityConfig:
@@ -23,7 +23,7 @@ Resources:
           - DomainName: "udapeople-s3-${WorkflowID}.s3.amazonaws.com"
             Id: "udapeople-s3-${WorkflowID}"
             S3OriginConfig:
-              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity01}"
         Enabled: True
         DefaultRootObject: index.html
         DefaultCacheBehavior:
