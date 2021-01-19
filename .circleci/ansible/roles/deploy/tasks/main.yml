@@ -26,3 +26,8 @@
     command: pm2 start -f ./main.js
     args:
       chdir: /home/ubuntu/uda_app/dist
+    environment:
+      ENVIRONMENT: production
+      TYPEORM_MIGRATIONS_DIR: "./migrations"
+      TYPEORM_MIGRATIONS: "./migrations/*.js"
+      TYPEORM_ENTITIES: "./modules/domain/**/*.entity.js"

@@ -69,6 +69,18 @@ commands:
           aws s3 rm s3://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7} --recursive
           aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
         when: << parameters.when >>
+     - run:
+        name: Destroy logging
+        command: |
+          aws cloudformation delete-stack --stack-name "udapeople-logging-${CIRCLE_WORKFLOW_ID:0:7}"
+        when: << parameters.when >>
+     - run:
+        name: Destroy cloudfront
+        command: |
+          aws cloudformation delete-stack --stack-name "udapeople-cloudfront-${CIRCLE_WORKFLOW_ID:0:7}"
+        when: << parameters.when >>
+
+
 
 
   revert-migrations:
@@ -78,8 +90,13 @@ commands:
         type: string
     steps:
       - run:
+          name: Check existence of aws cli and install it
+          command: sh scripts/check_aws.sh
+          when: << parameters.when >>
+      - run:
           working_directory: ./backend
           command: |
+            export TYPEORM_HOST=$(cat ../.circleci/ansible/backend_ip)
             SUCCESS=$(curl -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7})
             echo $SUCCESS
             if [[ "$SUCCESS" == "true" ]]
@@ -183,7 +200,7 @@ jobs:
 
 
 
-  deploy-infrastructure:
+  deploy-infrastructure-frontend-backend:
     executor: aws
     steps:
       - checkout
@@ -215,10 +232,12 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --output text >> .circleci/ansible/backend_ip
+            cat .circleci/ansible/backend_ip
       - run:
           name: Add back-end IP to inventory
           command: |
             cat .circleci/ansible/backend_ip >> .circleci/ansible/inventory
+            cat .circleci/ansible/inventory
       - persist_to_workspace:
           root: .
           paths:
@@ -226,6 +245,46 @@ jobs:
             - .circleci/ansible/inventory
       - destroy-environment:
           when: on_fail
+
+  
+  deploy-infrastructure-prometheus:
+    executor: aws
+    steps:
+      - checkout
+      - aws-install-dependencies
+      - run:
+          name: Ensure logging infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/prometheus.yml \
+              --tags project=udapeople \
+              --stack-name "udapeople-logging-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7} 
+      - run:
+          name: Prepare ansible inventory file
+          command: |
+            echo "[logging]" > .circleci/ansible/inventory-logging
+      - run:
+          name: Extract Logging IP
+          command: |
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople-logging-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text >> .circleci/ansible/logging_ip
+            cat .circleci/ansible/logging_ip
+      - run:
+          name: Add logging IP to inventory
+          command: |
+            cat .circleci/ansible/logging_ip >> .circleci/ansible/inventory-logging
+            cat .circleci/ansible/inventory-logging
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .circleci/ansible/logging_ip
+            - .circleci/ansible/inventory-logging
+      - destroy-environment:
+          when: on_fail
+
 
 
   configure-infrastructure:
@@ -245,13 +304,23 @@ jobs:
           name: Check inventory file
           working_directory: .circleci
           command: |
+            echo "Backend->"
             cat ansible/inventory
-            cat ansible/backend_ip
+            echo "Logging->"
+            cat ansible/inventory-logging
       - run:
-          name: Configure server
+          name: Configure backend server
           working_directory: .circleci
           command: |
             ansible-playbook -i ansible/inventory ansible/configure-server.yml
+      - run:
+          name: Configure logging server
+          working_directory: .circleci
+          command: |
+            cat ansible/inventory-logging
+            export NODE_EXP_TARGET_URL=$(cat ansible/backend_ip)
+            export LOGGING_HOST=$(cat ansible/logging_ip)
+            ansible-playbook -i ansible/inventory-logging ansible/deploy-prometheus.yml
       - destroy-environment:
           when: on_fail
 
@@ -270,6 +339,9 @@ jobs:
           working_directory: ./backend
           command: |
             export TYPEORM_HOST=$(cat ../.circleci/ansible/backend_ip)
+            export TYPEORM_USERNAME=$(echo $TYPEORM_USERNAME)
+            export TYPEORM_PASSWORD=$(echo $TYPEORM_PASSWORD)
+            export TYPEORM_DATABASE=$(echo $TYPEORM_DATABASE)
             npm run migrations > migration_status
       - run:
           name: Save migration results to workspace
@@ -287,7 +359,13 @@ jobs:
           name: Save migration status to memstash
           working_directory: ./backend
           command: |
-            curl -H "Content-Type: text/plain" -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request PUT --data "$(migration_result)" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7}
+            curl -H "Content-Type: text/plain" -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request PUT --data "$(cat migration_result)" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - backend/node_modules
+            - backend/dist
+          when: on_success
       - destroy-environment:
           when: on_fail
 
@@ -354,10 +432,10 @@ jobs:
           name: Deploy backend
           working_directory: .circleci/ansible/
           command: |
+            export TYPEORM_HOST=$(cat backend_ip)
             ansible-playbook -i inventory deploy-backend.yml 
       - destroy-environment:
           when: on_fail
-
 
   smoke-test:
     executor: node
@@ -367,44 +445,51 @@ jobs:
           at: .
       - run:
           name: Backend smoke test.
-          working_directory: ./circleci/ansible
+          working_directory: ./.circleci/ansible
           command: |
             pwd
             ls -la
             export BACKEND_IP=$(cat backend_ip)
             export BACKEND_URL="http://$BACKEND_IP:3030/api/status"
-            curl "$BACKEND_URL/api/status"
+            curl "$BACKEND_URL"
       - run:
           name: Frontend smoke test.
           working_directory: ./backend
           command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.eu-central-1.amazonaws.com/index.html"
-            curl -s ${URL} | grep -q "Welcome"
+            URL="http://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.us-west-2.amazonaws.com/index.html"
+            FRONTEND_LIVE=$(curl -s ${URL} | grep -o "Welcome")
+            if [[ $FRONTEND_LIVE == "Welcome" ]]
             then
-              return 1
+              exit 0
             else
-              return 0
+              exit 1
             fi
-      - destroy-environment:
-          when: on_fail
       - revert-migrations:
           when: on_fail
- 
-
+      - destroy-environment:
+          when: on_fail
+      
   cloudfront-update:
-    executor: aws
+    executor: node
     steps:
       - checkout
-      - aws-install-dependencies
+      - run:
+          name: Check existence of aws cli and install it
+          command: sh scripts/check_aws.sh
       - run:
           name: Update cloudfront distribution
           working_directory: ./.circleci/files
           command: |
             aws cloudformation deploy \
-              --template-file cloudfront.yaml \
-              --stack-name udapeople-cloudfront-production \
+              --template-file cloudfront.yml \
+              --stack-name udapeople-cloudfront-${CIRCLE_WORKFLOW_ID:0:7} \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=udapeople
+              --tags project="udapeople-cloudfront"
+      - run:
+          name: Show Error Trace
+          command: |
+            aws cloudformation describe-stack-events --stack-name udapeople-cloudfront-${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
       - revert-migrations:
           when: on_fail
       - destroy-environment:
@@ -416,38 +501,63 @@ jobs:
       - checkout
       - aws-install-dependencies
       - run:
-          name: Get old stack workflow id
+          name: Get current stack workflow id
           command: |
-            export OldWorkflowID=$(aws cloudformation \
+            export CurrentWorkflowID=$(aws cloudformation \
               list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
               --no-paginate --output text)
 
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
-              --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+              --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
+
+            export S3_BUCKETS=($(aws s3 ls | cut -d" " -f3)) 
+            
+            echo "${S3_BUCKETS[@]}"
+            echo "${STACKS[@]}"
+            echo "$CurrentWorkflowID"
+
+ 
       - run:
           name: Remove old stacks and files
           command: |
-            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
-            then
-              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-              aws s3 rm "s3://udapeople-s3-${OldWorkflowID}" --recursive
-            fi
+            # empty all S3 Buckets that aren't tagged with current WorkflowID
+            for s3 in ${S3_BUCKETS[@]}; do 
+              if [[ ! "$s3" =~ "$CurrentWorkflowID" ]]; 
+                then
+                  echo "Removing Bucket $s3"
+                  aws s3 rm "s3://$s3" --recursive
+              fi
+            done
 
-
+            # delete all stacks that aren't tagged with current WorkflowID
+            for stack in ${STACKS[@]}; do 
+              if [[ ! "$stack" =~ "${CurrentWorkflowID}" ]]
+                then
+                  echo "Removing Stack $stack"
+                  aws cloudformation delete-stack --stack-name "$stack"
+                fi
+            done
+            
 workflows:
   default:
     jobs:
       - build-frontend
-      - build-backend
+      - build-backend:
+          context:
+            - udacity_devops_project3
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
           requires: [build-backend]
+          context:
+            - udacity_devops_project3  
       - scan-backend:
           requires: [build-backend]
+          context:
+            - udacity_devops_project3
       - scan-frontend:
           requires: [build-frontend]
-      - deploy-infrastructure:
+      - deploy-infrastructure-frontend-backend:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           context:
             - aws_vars
@@ -456,11 +566,22 @@ workflows:
               only:
                 - master
       # I would like to set here an condition to run destroy-environment on failing jobs but this seems not possible right now in a single workflow
+      - deploy-infrastructure-prometheus:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          context:
+            - aws_vars
+          filters:
+            branches:
+              only:
+                - master
+
       - configure-infrastructure:
-          requires: [deploy-infrastructure]
+          requires: [deploy-infrastructure-frontend-backend, deploy-infrastructure-prometheus]
           context:
             - aws_vars
             - udacity_devops_project3
+            - alertmanager_bot
+            - prom_ec2_read
       - run-migrations:
           requires: [configure-infrastructure]
           context:
@@ -469,24 +590,30 @@ workflows:
       - deploy-01-frontend:
           requires: [run-migrations]
           context:
-            - aws_vars 
+            - aws_vars
+            - udacity_devops_project3 
       - deploy-02-frontend:
           requires: [run-migrations, deploy-01-frontend]
           context:  
             - aws_vars
+            - udacity_devops_project3
       - deploy-backend:
           requires: [run-migrations]
           context:
-            - aws_vars 
+            - aws_vars
+            - udacity_devops_project3 
       - smoke-test:
           requires: [deploy-backend, deploy-01-frontend, deploy-02-frontend]
           context:
             - aws_vars
+            - udacity_devops_project3
       - cloudfront-update:
           requires: [smoke-test]
           context:
             - aws_vars
+            - udacity_devops_project3
       - cleanup:
           requires: [cloudfront-update]
           context:
             - aws_vars
+            - udacity_devops_project3

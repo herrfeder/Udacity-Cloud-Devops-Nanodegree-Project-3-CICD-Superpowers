@@ -13,25 +13,26 @@ Resources:
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: !Sub udapeople-security-${ID}
-      GroupDescription: Allow port 22 and port 3030.
+      GroupName: !Sub udapeople-security-prometheus-${ID}
+      GroupDescription: Allow port 22 and port 8080 and port 9090.
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
-          FromPort: 3030
-          ToPort: 3030
+          FromPort: 9090
+          ToPort: 9090
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
-          FromPort: 5432
-          ToPort: 5432
+          FromPort: 9093
+          ToPort: 9093
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
-          FromPort: 9100
-          ToPort: 9100
+          FromPort: 8080
+          ToPort: 8080
           CidrIp: 0.0.0.0/0
+
 
 
   EC2Instance:
@@ -40,8 +41,8 @@ Resources:
       InstanceType: t2.micro
       SecurityGroups:
         - Ref: InstanceSecurityGroup
-      KeyName: ssh_access # If you use another key pair name, you should change this value to match.
+      KeyName: ssh_access
       ImageId: !Ref LatestAmiId 
       Tags:
         - Key: project
-          Value: !Sub udapeople-backend-${ID}
+          Value: !Sub udapeople-logging-${ID}

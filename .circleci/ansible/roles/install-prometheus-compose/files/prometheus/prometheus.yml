@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+  external_labels:
+    monitor: 'prometheus'
+
+rule_files:
+- /etc/prometheus/rules.yml
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - "alertmanager:9093"
+
+scrape_configs:
+  - job_name: 'node'
+    ec2_sd_configs:
+      - region: us-west-2
+        access_key: "{{ lookup('env', 'EC2_ACCESS_KEY') }}"
+        secret_key: "{{ lookup('env', 'EC2_SECRET_KEY') }}"
+        port: 9100
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ["{{ lookup('env', 'NODE_EXP_TARGET_URL') }}:9100"]
