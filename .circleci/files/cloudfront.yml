@@ -20,16 +20,16 @@ Resources:
     Properties:
       DistributionConfig:
         Origins:
-          - DomainName: "udapeople-s3-${WorkflowID}.s3.amazonaws.com"
-            Id: "udapeople-s3-${WorkflowID}"
+          - DomainName: !Sub "udapeople-s3-${WorkflowID}.s3.amazonaws.com"
+            Id: "udapeople-s3-cloudfront"
             S3OriginConfig:
-              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity01}"
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
         Enabled: True
         DefaultRootObject: index.html
         DefaultCacheBehavior:
           ForwardedValues:
             QueryString: False
-          TargetOriginId: "udapeople-s3-${WorkflowID}"
+          TargetOriginId: "udapeople-s3-cloudfront"
           ViewerProtocolPolicy: allow-all
 
 
