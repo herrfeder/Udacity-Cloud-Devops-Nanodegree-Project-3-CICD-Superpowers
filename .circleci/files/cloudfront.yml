@@ -20,7 +20,7 @@ Resources:
     Properties:
       DistributionConfig:
         Origins:
-          - DomainName: !Sub "udapeople-s3-${WorkflowID}.s3.amazonaws.com"
+          - DomainName: "udapeople-s3-${WorkflowID}.s3.amazonaws.com"
             Id: "udapeople-s3-${WorkflowID}"
             S3OriginConfig:
               OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
