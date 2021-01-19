@@ -20,9 +20,7 @@ Resources:
     Properties:
       DistributionConfig:
         Origins:
-          - DomainName: 
-              - "udapeople-s3-${WorkflowID}.s3.amazonaws.com"
-              - { ID: !Select [0, !Split [ "-", !Ref WorkflowID] ] }
+          - DomainName: "udapeople-s3-${WorkflowID}.s3.amazonaws.com"
             Id: "udapeople-s3-${WorkflowID}"
             S3OriginConfig:
               OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
@@ -31,7 +29,7 @@ Resources:
         DefaultCacheBehavior:
           ForwardedValues:
             QueryString: False
-          TargetOriginId: webpage
+          TargetOriginId: "udapeople-s3-${WorkflowID}"
           ViewerProtocolPolicy: allow-all
 
 
