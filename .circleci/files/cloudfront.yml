@@ -9,7 +9,7 @@ Parameters:
 
 Resources:
   
-  CloudFrontOriginAccessIdentity01:
+  CloudFrontOriginAccessIdentity:
     Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
     Properties:
       CloudFrontOriginAccessIdentityConfig:
