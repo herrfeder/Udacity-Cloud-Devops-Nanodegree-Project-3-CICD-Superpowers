@@ -236,6 +236,7 @@ jobs:
               --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --output text >> .circleci/ansible/backend_ip
             cat .circleci/ansible/backend_ip
+            curl -H "Content-Type: text/plain" -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request PUT --data "$(cat .circleci/ansible/backend_ip)" https://api.memstash.io/values/backendip
       - run:
           name: Add back-end IP to inventory
           command: |
@@ -396,8 +397,8 @@ jobs:
           working_directory: ./frontend
           command: | 
             #environment variables doesn't survive through multiple steps
-            ls ../.circleci/ansible/
-            cat ../.circleci/ansible/backend_ip >> BACKEND_IP 
+            # somehow I don't get backend_ip to survive until here therefore using memstash.io
+            BACKEND_IP=$(curl -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request GET https://api.memstash.io/values/backendip)
             export API_URL="http://$BACKEND_IP:3030"
             echo "$BACKEND_IP"
             echo "$API_URL"
