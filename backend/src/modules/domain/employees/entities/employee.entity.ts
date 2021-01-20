@@ -1,4 +1,4 @@
-import * as moment from 'moment-timezone';
+const moment = require('moment');
 import { AggregateRoot } from '../../../common/entities';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { CreateEmployee } from '../commands/create-employee.command';
@@ -27,7 +27,7 @@ export class Employee extends AggregateRoot<number> {
       this.city = params.city;
       this.country = params.country;
       this.displayName = params.displayName;
-      this.effectiveDate = getDateFromString(params.effectiveDate);
+      this.effectiveDate =  getDateFromString(params.effectiveDate);
       this.companyEmail = params.companyEmail;
       this.bankName = params.bankName;
       this.birthdate = getDateFromString(params.birthdate);
@@ -121,7 +121,7 @@ export enum SalaryType {
 }
 
 export function getDateFromString(date: string): Date {
-  return moment(date).format('M/D/YYYY');
+  return moment(date).format('MM-DD-YYYY');
 }
 
 function getGenderFromEnum(gender: string): Gender {

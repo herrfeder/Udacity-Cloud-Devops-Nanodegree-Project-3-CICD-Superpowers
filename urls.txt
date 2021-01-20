@@ -1,5 +1,5 @@
 URL01: https://github.com/herrfeder/Udacity-Cloud-Devops-Nanodegree-Project-3-CICD-Superpowers
-URL02: https://udapeople-s3-1661e4e.s3-website-us-west-2.amazonaws.com
-URL03: https://d9rjwuoqu9uqi.cloudfront.net 
-URL04: http://34.216.162.10:9100
-URL05: http://34.215.223.115:9090
+URL02: http://udapeople-s3-e8f907d.s3-website-us-west-2.amazonaws.com
+URL03: http://d1w8ae0rd7hryw.cloudfront.net/
+URL04: http://34.217.49.203:9100
+URL05: http://54.213.91.225:9090

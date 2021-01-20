@@ -205,6 +205,9 @@ jobs:
     steps:
       - checkout
       - aws-install-dependencies
+      - attach_workspace:
+          at: .
+
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -233,6 +236,7 @@ jobs:
               --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --output text >> .circleci/ansible/backend_ip
             cat .circleci/ansible/backend_ip
+            curl -H "Content-Type: text/plain" -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request PUT --data "$(cat .circleci/ansible/backend_ip)" https://api.memstash.io/values/backendip
       - run:
           name: Add back-end IP to inventory
           command: |
@@ -252,6 +256,9 @@ jobs:
     steps:
       - checkout
       - aws-install-dependencies
+      - attach_workspace:
+          at: .
+
       - run:
           name: Ensure logging infrastructure exists
           command: |
@@ -277,11 +284,16 @@ jobs:
           command: |
             cat .circleci/ansible/logging_ip >> .circleci/ansible/inventory-logging
             cat .circleci/ansible/inventory-logging
+            cat .circleci/ansible/backend_ip
+            ls .circleci/ansible/
       - persist_to_workspace:
           root: .
           paths:
             - .circleci/ansible/logging_ip
             - .circleci/ansible/inventory-logging
+            - .circleci/ansible/backend_ip
+            - .circleci/ansible/inventory
+
       - destroy-environment:
           when: on_fail
 
@@ -384,10 +396,13 @@ jobs:
           name: Get Backend URL and build front-end
           working_directory: ./frontend
           command: | 
-            cat ../.circleci/ansible/backend_ip >> BACKEND_IP 
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
-            echo "$API_URL" >> "frontend/.env"
+            #environment variables doesn't survive through multiple steps
+            # somehow I don't get backend_ip to survive until here therefore using memstash.io
+            BACKEND_IP=$(curl -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request GET https://api.memstash.io/values/backendip)
+            export API_URL="http://$BACKEND_IP:3030"
+            echo "$BACKEND_IP"
+            echo "$API_URL"
+            echo "$API_URL" >> ".env"
             npm run build
       - persist_to_workspace:
           root: .
@@ -565,7 +580,7 @@ workflows:
                 - master
       # I would like to set here an condition to run destroy-environment on failing jobs but this seems not possible right now in a single workflow
       - deploy-infrastructure-prometheus:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend, deploy-infrastructure-frontend-backend]
           context:
             - aws_vars
           filters:
