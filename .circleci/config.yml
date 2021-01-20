@@ -579,7 +579,7 @@ workflows:
                 - master
       # I would like to set here an condition to run destroy-environment on failing jobs but this seems not possible right now in a single workflow
       - deploy-infrastructure-prometheus:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend, deploy-infrastructure-frontend-backend]
           context:
             - aws_vars
           filters:
