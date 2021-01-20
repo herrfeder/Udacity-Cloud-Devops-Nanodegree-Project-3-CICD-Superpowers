@@ -205,6 +205,9 @@ jobs:
     steps:
       - checkout
       - aws-install-dependencies
+      - attach_workspace:
+          at: .
+
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -252,6 +255,9 @@ jobs:
     steps:
       - checkout
       - aws-install-dependencies
+      - attach_workspace:
+          at: .
+
       - run:
           name: Ensure logging infrastructure exists
           command: |
@@ -277,12 +283,16 @@ jobs:
           command: |
             cat .circleci/ansible/logging_ip >> .circleci/ansible/inventory-logging
             cat .circleci/ansible/inventory-logging
+            cat .circleci/ansible/backend_ip
             ls .circleci/ansible/
       - persist_to_workspace:
           root: .
           paths:
             - .circleci/ansible/logging_ip
             - .circleci/ansible/inventory-logging
+            - .circleci/ansible/backend_ip
+            - .circleci/ansible/inventory
+
       - destroy-environment:
           when: on_fail
 
