@@ -384,6 +384,7 @@ jobs:
           name: Get Backend URL and build front-end
           working_directory: ./frontend
           command: | 
+            #environment variables doesn't survive through multiple steps
             cat ../.circleci/ansible/backend_ip >> BACKEND_IP 
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
