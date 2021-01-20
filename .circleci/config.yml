@@ -277,6 +277,7 @@ jobs:
           command: |
             cat .circleci/ansible/logging_ip >> .circleci/ansible/inventory-logging
             cat .circleci/ansible/inventory-logging
+            ls .circleci/ansible/
       - persist_to_workspace:
           root: .
           paths:
@@ -385,9 +386,11 @@ jobs:
           working_directory: ./frontend
           command: | 
             #environment variables doesn't survive through multiple steps
+            ls ../.circleci/ansible/
             cat ../.circleci/ansible/backend_ip >> BACKEND_IP 
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
+            export API_URL="http://$BACKEND_IP:3030"
+            echo "$BACKEND_IP"
+            echo "$API_URL"
             echo "$API_URL" >> ".env"
             npm run build
       - persist_to_workspace:
