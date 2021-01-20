@@ -27,7 +27,7 @@
     args:
       chdir: /home/ubuntu/uda_app/dist
     environment:
-      ENVIRONMENT: production
+      NODE_ENV: production
       TYPEORM_MIGRATIONS_DIR: "./migrations"
       TYPEORM_MIGRATIONS: "./migrations/*.js"
       TYPEORM_ENTITIES: "./modules/domain/**/*.entity.js"

@@ -29,7 +29,7 @@
     - install-postgres-compose
     - configure-prometheus-node-exporter
   environment:
-    ENVIRONMENT: production
+    NODE_ENV: production
     TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION') }}"
     TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES') }}"
     TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST') }}"
