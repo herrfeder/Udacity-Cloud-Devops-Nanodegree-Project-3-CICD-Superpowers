@@ -27,7 +27,7 @@ export class Employee extends AggregateRoot<number> {
       this.city = params.city;
       this.country = params.country;
       this.displayName = params.displayName;
-      this.effectiveDate = getDateFromString(params.effectiveDate);
+      this.effectiveDate =  getDateFromString(params.effectiveDate);
       this.companyEmail = params.companyEmail;
       this.bankName = params.bankName;
       this.birthdate = getDateFromString(params.birthdate);
