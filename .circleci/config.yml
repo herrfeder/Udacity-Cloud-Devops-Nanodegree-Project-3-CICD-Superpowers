@@ -388,7 +388,7 @@ jobs:
             cat ../.circleci/ansible/backend_ip >> BACKEND_IP 
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
-            echo "$API_URL" >> "frontend/.env"
+            echo "$API_URL" >> ".env"
             npm run build
       - persist_to_workspace:
           root: .
